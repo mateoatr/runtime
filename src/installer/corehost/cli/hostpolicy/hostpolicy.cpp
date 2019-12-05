@@ -372,13 +372,13 @@ int corehost_main_init(
 
 SHARED_API int HOSTPOLICY_CALLTYPE corehost_main(const int argc, const pal::char_t* argv[])
 {
-    arguments_t args;
-    int rc = corehost_main_init(g_init, argc, argv, _X("corehost_main"), args);
+    std::unique_ptr<arguments_t> args(new arguments_t);
+    int rc = corehost_main_init(g_init, argc, argv, _X("corehost_main"), *args);
     if (rc != StatusCode::Success)
         return rc;
 
     assert(g_context == nullptr);
-    rc = create_hostpolicy_context(g_init, args, true /* breadcrumbs_enabled */);
+    rc = create_hostpolicy_context(g_init, *args, true /* breadcrumbs_enabled */);
     if (rc != StatusCode::Success)
         return rc;
 
@@ -386,7 +386,7 @@ SHARED_API int HOSTPOLICY_CALLTYPE corehost_main(const int argc, const pal::char
     if (rc != StatusCode::Success)
         return rc;
 
-    return run_app(args.app_argc, args.app_argv);
+    return run_app(args->app_argc, args->app_argv);
 }
 
 SHARED_API int HOSTPOLICY_CALLTYPE corehost_main_with_output_buffer(const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size)
