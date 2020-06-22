@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -207,6 +208,7 @@ namespace Microsoft.XmlSerializer.Generator
             return 0;
         }
 
+        [DynamicDependency("GenerateSerializer", typeof(System.Xml.Serialization.XmlSerializer))]
         private void GenerateFile(List<string> typeNames, string assemblyName, bool proxyOnly, bool silent, bool warnings, bool force, string outputDirectory, bool parsableerrors)
         {
             Assembly assembly = LoadAssembly(assemblyName, true);

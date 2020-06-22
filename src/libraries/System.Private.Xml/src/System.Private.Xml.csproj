@@ -8,6 +8,7 @@
     <TargetFrameworks>$(NetCoreAppCurrent)-Windows_NT;$(NetCoreAppCurrent)-Unix</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ILLinker\System.Private.Xml.WarningSuppressions.cs" />
     <Compile Include="$(CommonPath)System\Text\StringBuilderCache.cs"
              Link="Common\System\StringBuilderCache.cs" />
     <Compile Include="$(CommonPath)System\Marvin.cs"
