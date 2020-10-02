@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using BundleTests.Helpers;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.DotNet.CoreSetup.Test;
@@ -42,7 +43,7 @@ namespace AppHost.Bundle.Tests
                 .And.HaveStdOutContaining("AppContext.BaseDirectory: " + Path.GetDirectoryName(singleFile))
                 // If we don't extract anything to disk, the extraction dir shouldn't
                 // appear in the native search dirs.
-                .And.HaveStdOutMatching($"NATIVE_DLL_SEARCH_DIRECTORIES: .*{bundleDir}")
+                .And.HaveStdOutMatching(Regex.Escape($"NATIVE_DLL_SEARCH_DIRECTORIES: .*{bundleDir}"))
                 .And.NotHaveStdOutContaining(extractionDir);
         }
 
@@ -72,7 +73,7 @@ namespace AppHost.Bundle.Tests
                 .And.HaveStdOutContaining("ExecutingAssembly.Location: " + extractionDir) // Should point to the app's dll
                 .And.HaveStdOutContaining("AppContext.BaseDirectory: " + extractionDir) // Should point to the extraction directory
                 // In extraction mode, we should have both dirs
-                .And.HaveStdOutMatching($"NATIVE_DLL_SEARCH_DIRECTORIES: .*{extractionDir}.*{bundleDir}");
+                .And.HaveStdOutMatching(Regex.Escape($"NATIVE_DLL_SEARCH_DIRECTORIES: .*{extractionDir}.*{bundleDir}"));
         }
 
         public class SharedTestState : SharedTestStateBase, IDisposable
