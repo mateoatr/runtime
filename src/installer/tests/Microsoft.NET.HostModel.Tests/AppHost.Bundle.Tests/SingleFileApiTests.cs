@@ -68,11 +68,11 @@ namespace AppHost.Bundle.Tests
                 .And.HaveStdOutContaining("SingleFileApiTests.dll")
                 .And.HaveStdOutContaining("SingleFileApiTests.deps.json") // The app's .deps.json should be available
                 .And.NotHaveStdOutContaining("Microsoft.NETCore.App.deps.json") // No framework - it's self-contained
-                                                                                // For single-file, Environment.GetCommandLineArgs[0] should return the file path of the host.
+                // For single-file, Environment.GetCommandLineArgs[0] should return the file path of the host.
                 .And.HaveStdOutContaining("Command line args: " + singleFile)
                 .And.HaveStdOutContaining("ExecutingAssembly.Location: " + extractionDir) // Should point to the app's dll
                 .And.HaveStdOutContaining("AppContext.BaseDirectory: " + extractionDir) // Should point to the extraction directory
-                                                                                        // In extraction mode, we should have both dirs
+                // In extraction mode, we should have both dirs
                 .And.HaveStdOutMatching(Regex.Escape($"NATIVE_DLL_SEARCH_DIRECTORIES: .*{extractionDir}.*{bundleDir}"));
         }
 
