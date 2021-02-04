@@ -244,6 +244,18 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         }
 
         [Fact]
+        public void Hostfxr_get_dotnet_environment_info()
+        {
+            var f = new SdkResolutionFixture(sharedTestState);
+
+            f.Dotnet.Exec(f.AppDll, new[] { "hostfxr_get_dotnet_environment_info", f.ExeDir })
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should().Pass();
+        }
+
+        [Fact]
         public void Hostpolicy_corehost_set_error_writer_test()
         {
             var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();

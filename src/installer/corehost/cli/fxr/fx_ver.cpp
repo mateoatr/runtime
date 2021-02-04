@@ -21,6 +21,7 @@ fx_ver_t::fx_ver_t(int major, int minor, int patch, const pal::string_t& pre, co
     assert(is_empty() || m_patch >= 0);
     assert(m_pre[0] == 0 || validIdentifiers(m_pre));
     assert(m_build[0] == 0 || validIdentifiers(m_build));
+    version_str = this->as_str();
 }
 
 fx_ver_t::fx_ver_t(int major, int minor, int patch, const pal::string_t& pre)
@@ -386,6 +387,6 @@ bool parse_internal(const pal::string_t& ver, fx_ver_t* fx_ver, bool parse_only_
 bool fx_ver_t::parse(const pal::string_t& ver, fx_ver_t* fx_ver, bool parse_only_production)
 {
     bool valid = parse_internal(ver, fx_ver, parse_only_production);
-    assert(!valid || fx_ver->as_str() == ver);
+    assert(!valid || fx_ver->version_str == ver);
     return valid;
 }

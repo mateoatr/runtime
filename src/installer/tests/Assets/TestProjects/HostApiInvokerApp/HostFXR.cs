@@ -23,6 +23,36 @@ namespace HostApiInvokerApp
                 global_json_path = 1,
             }
 
+            internal struct hostfxr_dotnet_environment_sdk_info
+            {
+                int size;
+                string version;
+                string path;
+            }
+
+            internal struct hostfxr_dotnet_environment_framework_info
+            {
+                int size;
+                string name;
+                string version;
+                string path;
+            }
+
+            internal struct hostfxr_dotnet_environment_info
+            {
+                int size;
+                string hostfxr_version;
+                string hostfxr_commit_hash;
+
+                int sdk_count;
+                [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.LPStruct)]
+                hostfxr_dotnet_environment_sdk_info[] sdks;
+
+                int frameworks_count;
+                [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.LPStruct)]
+                hostfxr_dotnet_environment_framework_info[] frameworks;
+            }
+
             [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = Utils.OSCharSet)]
             internal delegate void hostfxr_resolve_sdk2_result_fn(
                 hostfxr_resolve_sdk2_result_key_t key,
@@ -53,6 +83,18 @@ namespace HostApiInvokerApp
             [DllImport(nameof(hostfxr), CharSet = Utils.OSCharSet, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             internal static extern IntPtr hostfxr_set_error_writer(
                 hostfxr_error_writer_fn error_writer);
+
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = Utils.OSCharSet)]
+            internal delegate void hostfxr_get_dotnet_environment_info_result_fn(
+                hostfxr_dotnet_environment_info info,
+                IntPtr result_context);
+
+            [DllImport(nameof(hostfxr), CharSet = Utils.OSCharSet, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+            internal static extern int hostfxr_get_dotnet_environment_info(
+                string dotnet_root,
+                IntPtr reserved,
+                hostfxr_get_dotnet_environment_info_result_fn result,
+                IntPtr result_context);
         }
 
         /// <summary>
@@ -142,6 +184,25 @@ namespace HostApiInvokerApp
             }
         }
 
+        static void Test_hostfxr_get_dotnet_environment_info(string[] args)
+        {
+            (hostfxr.hostfxr_dotnet_environment_info info, IntPtr result_context) environment_info;
+            int rc = hostfxr.hostfxr_get_dotnet_environment_info(
+                dotnet_root: args[1],
+                IntPtr.Zero,
+                result: (info, result_context) => { environment_info.info = info; environment_info.result_context = result_context; },
+                IntPtr.Zero);
+
+            if (rc == 0)
+            {
+                Console.WriteLine("hostfxr_get_dotnet_environment_info:Success");
+            }
+            else
+            {
+                Console.WriteLine($"hostfxr_get_dotnet_environment_info:Fail[{rc}]");
+            }
+        }
+
         public static bool RunTest(string apiToTest, string[] args)
         {
             switch (apiToTest)
@@ -154,6 +215,9 @@ namespace HostApiInvokerApp
                     break;
                 case nameof(Test_hostfxr_set_error_writer):
                     Test_hostfxr_set_error_writer(args);
+                    break;
+                case nameof(hostfxr.hostfxr_get_dotnet_environment_info):
+                    Test_hostfxr_get_dotnet_environment_info(args);
                     break;
                 default:
                     return false;

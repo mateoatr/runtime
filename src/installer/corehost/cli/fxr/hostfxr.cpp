@@ -14,6 +14,7 @@
 #include "hostfxr.h"
 #include "host_context.h"
 #include "bundle/info.h"
+#include <framework_info.h>
 
 namespace
 {
@@ -326,6 +327,71 @@ SHARED_API int32_t HOSTFXR_CALLTYPE hostfxr_get_available_sdks(
 
         result(sdk_dirs.size(), &sdk_dirs[0]);
     }
+
+    return StatusCode::Success;
+}
+
+typedef void (HOSTFXR_CALLTYPE* hostfxr_get_dotnet_environment_info_result_fn)(
+    const hostfxr_dotnet_environment_info* info,
+    void* result_context);
+
+SHARED_API int32_t HOSTFXR_CALLTYPE hostfxr_get_dotnet_environment_info(
+    const char_t* dotnet_root,
+    void* reserved,
+    hostfxr_get_dotnet_environment_info_result_fn result,
+    void* result_context)
+{
+    const host_context_t* context_maybe = fx_muxer_t::get_active_host_context();
+    if (dotnet_root == nullptr)
+    {
+        dotnet_root = _X("");
+    }
+
+    std::vector<sdk_info> sdk_infos;
+    sdk_info::get_all_sdk_infos(dotnet_root, &sdk_infos);
+
+    std::vector<hostfxr_dotnet_environment_sdk_info> environment_sdk_infos;
+    environment_sdk_infos.reserve(sdk_infos.size());
+    for (const sdk_info& info : sdk_infos)
+    {
+        hostfxr_dotnet_environment_sdk_info dotnet_environment_sdk_info
+        {
+            sizeof(hostfxr_dotnet_environment_sdk_info),
+            info.version.version_str.c_str(),
+            info.full_path.c_str()
+        };
+
+        environment_sdk_infos.push_back(dotnet_environment_sdk_info);
+    }
+
+    std::vector<framework_info> framework_infos;
+    framework_info::get_all_framework_infos(dotnet_root, _X(""), &framework_infos);
+
+    std::vector<hostfxr_dotnet_environment_framework_info> environment_framework_infos;
+    environment_framework_infos.reserve(framework_infos.size());
+    for (const framework_info& info : framework_infos)
+    {
+        hostfxr_dotnet_environment_framework_info dotnet_environment_framework_info;
+        dotnet_environment_framework_info.name = info.name.c_str();
+        dotnet_environment_framework_info.path = info.path.c_str();
+        dotnet_environment_framework_info.version = info.version.version_str.c_str();
+        environment_framework_infos.push_back(dotnet_environment_framework_info);
+    }
+
+    const hostfxr_dotnet_environment_info environment_info
+    {
+        sizeof(hostfxr_dotnet_environment_info),
+        nullptr,
+        nullptr,
+
+        environment_sdk_infos.size(),
+        (environment_info.sdk_count > 0) ? &environment_sdk_infos[0] : nullptr,
+
+        environment_framework_infos.size(),
+        (environment_info.frameworks_count > 0) ? &environment_framework_infos[0] : nullptr
+    };
+
+    result(&environment_info, result_context);
 
     return StatusCode::Success;
 }
